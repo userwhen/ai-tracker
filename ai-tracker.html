@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 額度恢復追蹤器</title>
+    <style>
+        :root {
+            --bg-color: #1e1e2e;
+            --card-bg: #313244;
+            --text-main: #cdd6f4;
+            --text-muted: #a6adc8;
+            --accent: #89b4fa;
+            --border: #45475a;
+            --ready: #a6e3a1;
+            --waiting: #f9e2af;
+            --input-bg: #181825;
+            --button-bg: #45475a;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: 2rem;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: var(--card-bg);
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+        }
+
+        h2 {
+            margin-top: 0;
+            color: var(--accent);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        #clock {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            font-family: monospace;
+            margin-left: 8px;
+        }
+
+        .header-btn {
+            background: var(--button-bg);
+            color: var(--text-main);
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        .header-btn:hover {
+            background: #585b70;
+        }
+        
+        .header-btn:active {
+            transform: scale(0.95);
+        }
+
+        .header-btn.muted {
+            opacity: 0.5;
+            text-decoration: line-through;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            color: var(--text-muted);
+            font-weight: 600;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .main-row td {
+            border-bottom: none;
+            padding-bottom: 8px;
+        }
+
+        .notes-row td {
+            border-top: none;
+            padding-top: 0;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        tbody:last-child .notes-row td {
+            border-bottom: none;
+        }
+
+        .account-name {
+            font-weight: bold;
+            color: #cba6f7;
+            font-size: 1.1rem;
+        }
+
+        input[type="time"], input[type="text"], textarea {
+            background: var(--input-bg);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            padding: 8px 12px;
+            border-radius: 6px;
+            width: 100%;
+            box-sizing: border-box;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        input[type="time"] {
+            font-family: monospace;
+            cursor: pointer;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 44px;
+            font-family: inherit;
+            border: 1px dashed var(--border);
+            line-height: 1.4;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            text-align: center;
+            display: inline-block;
+            min-width: 60px;
+            cursor: pointer;
+            user-select: none;
+            transition: transform 0.1s, opacity 0.2s;
+        }
+
+        .status-badge:hover {
+            opacity: 0.8;
+            transform: scale(1.05);
+        }
+
+        .status-badge:active {
+            transform: scale(0.95);
+        }
+
+        .status-ready { background: var(--ready); color: #11111b; }
+        .status-waiting { background: var(--waiting); color: #11111b; }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>
+        AI 帳號調度中心
+        <div class="header-controls">
+            <button class="header-btn" onclick="sortItems()">↕️ 重新排列</button>
+            <button id="sound-btn" class="header-btn" onclick="toggleSound()">🔔 提示音: 開啟</button>
+            <span id="clock">00:00:00</span>
+        </div>
+    </h2>
+    <table id="tracker-table">
+        <thead>
+            <tr>
+                <th width="15%">帳號</th>
+                <th width="25%">可用時間</th>
+                <th width="40%">處理內容</th>
+                <th width="20%">狀態</th>
+            </tr>
+        </thead>
+    </table>
+</div>
+
+<script>
+    // --- 音效系統設定 ---
+    let audioCtx = null;
+    let isSoundEnabled = true;
+
+    function initAudio() {
+        if (!audioCtx) {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            audioCtx = new AudioContext();
+        }
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+    }
+
+    window.toggleSound = function() {
+        isSoundEnabled = !isSoundEnabled;
+        const btn = document.getElementById('sound-btn');
+        if (isSoundEnabled) {
+            btn.textContent = '🔔 提示音: 開啟';
+            btn.classList.remove('muted');
+            initAudio();
+            playAlertSound();
+        } else {
+            btn.textContent = '🔕 提示音: 關閉';
+            btn.classList.add('muted');
+        }
+    };
+
+    function playAlertSound() {
+        if (!isSoundEnabled) return;
+        initAudio();
+        const playTone = (freq, startTime, duration) => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, startTime);
+            gain.gain.setValueAtTime(0.4, startTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(startTime);
+            osc.stop(startTime + duration);
+        };
+        const now = audioCtx.currentTime;
+        playTone(880, now, 0.6);
+        playTone(1046.5, now + 0.15, 0.8);
+    }
+
+    // --- 核心資料系統 ---
+    const defaultData = [
+        { id: 'SI', time: '01:40', task: 'TASK', notes: '', unlockTimestamp: 0 },
+        { id: '18', time: '04:00', task: '全專案', notes: '', unlockTimestamp: 0 },
+        { id: 'N1', time: '01:30', task: '劇情', notes: '', unlockTimestamp: 0 },
+        { id: 'GR', time: '01:40', task: '教學', notes: '', unlockTimestamp: 0 },
+        { id: 'EC', time: '10:20', task: 'SETTING', notes: '', unlockTimestamp: 0 }
+    ];
+
+    let trackerData = JSON.parse(localStorage.getItem('aiTrackerData')) || defaultData;
+    trackerData = trackerData.map(item => ({
+        ...item,
+        notes: item.notes || '',
+        unlockTimestamp: item.unlockTimestamp || 0
+    }));
+
+    function saveData() {
+        localStorage.setItem('aiTrackerData', JSON.stringify(trackerData));
+    }
+
+    function renderTable() {
+        const table = document.getElementById('tracker-table');
+        const oldTbodys = table.querySelectorAll('tbody');
+        oldTbodys.forEach(tb => tb.remove());
+
+        trackerData.forEach((item, index) => {
+            const tbody = document.createElement('tbody');
+            const isReady = item.unlockTimestamp === 0 || Date.now() >= item.unlockTimestamp;
+            const badgeClass = isReady ? 'status-ready' : 'status-waiting';
+            const badgeText = isReady ? '可使用' : '冷卻中';
+
+            tbody.innerHTML = `
+                <tr class="main-row">
+                    <td class="account-name">${item.id}</td>
+                    <td>
+                        <input type="time" value="${item.time}" 
+                               onchange="updateField(${index}, 'time', this.value)">
+                    </td>
+                    <td>
+                        <input type="text" value="${item.task}" placeholder="輸入任務內容..."
+                               oninput="updateField(${index}, 'task', this.value)">
+                    </td>
+                    <td>
+                        <span id="status-${index}" class="status-badge ${badgeClass}" onclick="toggleStatus(${index})">
+                            ${badgeText}
+                        </span>
+                    </td>
+                </tr>
+                <tr class="notes-row">
+                    <td colspan="4">
+                        <textarea placeholder="當前進度或接下來要完成的部分..." 
+                                  oninput="updateField(${index}, 'notes', this.value)">${item.notes}</textarea>
+                    </td>
+                </tr>
+            `;
+            table.appendChild(tbody);
+        });
+    }
+
+    function getNextOccurrence(timeStr) {
+        if (!timeStr) return 0;
+        const [hours, minutes] = timeStr.split(':').map(Number);
+        const now = new Date();
+        let target = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes, 0, 0);
+        
+        if (target.getTime() <= now.getTime()) {
+            target.setDate(target.getDate() + 1);
+        }
+        return target.getTime();
+    }
+
+    // 單次點擊排序
+    window.sortItems = function() {
+        const now = Date.now();
+        trackerData.sort((a, b) => {
+            const aReady = a.unlockTimestamp === 0 || a.unlockTimestamp <= now;
+            const bReady = b.unlockTimestamp === 0 || b.unlockTimestamp <= now;
+            
+            // 可使用的排在前面
+            if (aReady && !bReady) return -1;
+            if (!aReady && bReady) return 1;
+            
+            // 如果都在冷卻中，按照解鎖時間排序（快解鎖的在上面）
+            if (!aReady && !bReady) {
+                return a.unlockTimestamp - b.unlockTimestamp;
+            }
+            
+            // 如果都是可使用狀態，維持原本相對順序
+            return 0;
+        });
+        saveData();
+        renderTable();
+    };
+
+    window.toggleStatus = function(index) {
+        initAudio();
+        const item = trackerData[index];
+        
+        if (item.unlockTimestamp > 0 && Date.now() < item.unlockTimestamp) {
+            // 目前為冷卻中 -> 手動強制切換回可使用
+            item.unlockTimestamp = 0;
+        } else {
+            // 目前為可使用 -> 點擊後，自動將時間往後推 5 小時
+            const targetDate = new Date();
+            targetDate.setHours(targetDate.getHours() + 5);
+            
+            // 格式化為 HH:MM 填入 input
+            const hh = String(targetDate.getHours()).padStart(2, '0');
+            const mm = String(targetDate.getMinutes()).padStart(2, '0');
+            
+            item.time = `${hh}:${mm}`;
+            item.unlockTimestamp = targetDate.getTime();
+        }
+        
+        saveData();
+        renderTable();
+    };
+
+    window.updateField = function(index, field, value) {
+        trackerData[index][field] = value;
+        // 如果手動修改時間欄位，自動重新計算該時間的倒數
+        if (field === 'time') {
+            trackerData[index].unlockTimestamp = getNextOccurrence(value);
+        }
+        saveData();
+    };
+
+    function checkStatus() {
+        const now = Date.now();
+        document.getElementById('clock').innerText = new Date().toLocaleTimeString('zh-TW', { hour12: false });
+
+        let needRender = false;
+        let playSound = false;
+
+        trackerData.forEach((item, index) => {
+            if (item.unlockTimestamp > 0 && now >= item.unlockTimestamp) {
+                item.unlockTimestamp = 0; 
+                needRender = true;
+                playSound = true;
+            }
+        });
+
+        if (needRender) {
+            saveData();
+            renderTable();
+        }
+        
+        if (playSound) {
+            playAlertSound();
+        }
+    }
+
+    renderTable();
+    setInterval(checkStatus, 1000);
+</script>
+
+</body>
+</html>
