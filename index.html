@@ -38,7 +38,6 @@
             max-width: 700px;
         }
 
-        /* 頂部 Header 自適應與靠右排版 */
         .page-header {
             background: var(--card-bg);
             padding: 20px;
@@ -73,7 +72,7 @@
             display: flex;
             flex-wrap: wrap;
             align-items: center;
-            justify-content: flex-end; /* 強制按鈕群組靠右 */
+            justify-content: flex-end;
             gap: 10px;
         }
 
@@ -87,19 +86,16 @@
             font-size: 1rem;
             font-weight: bold;
             transition: background 0.2s, transform 0.1s;
-            white-space: nowrap; /* 避免按鈕文字被折行 */
+            white-space: nowrap;
         }
 
-        .header-btn:active {
-            transform: scale(0.95);
-        }
-        .header-btn.muted {
-            opacity: 0.5;
-            text-decoration: line-through;
-        }
+        .header-btn:active { transform: scale(0.95); }
+        .header-btn.muted { opacity: 0.5; text-decoration: line-through; }
         .btn-add { background: var(--accent); color: #020617; }
+        
+        /* 救援舊資料專用按鈕樣式 */
+        .btn-rescue { background: #fbbf24; color: #020617; }
 
-        /* 卡片佈局 */
         #tracker-list {
             display: flex;
             flex-direction: column;
@@ -135,6 +131,13 @@
             width: 100px;
             font-family: inherit;
         }
+        
+        /* 讓 Placeholder (底部提示文字) 變得柔和 */
+        .account-name-input::placeholder {
+            color: var(--text-muted);
+            font-weight: normal;
+            font-size: 0.9rem;
+        }
 
         .account-name-input:focus { outline: none; border-color: var(--accent); }
 
@@ -153,10 +156,7 @@
             transition: all 0.2s ease;        
         }
 
-        .delete-btn:hover {
-            background: rgba(244, 63, 94, 0.1); 
-            color: var(--danger);               
-        }
+        .delete-btn:hover { background: rgba(244, 63, 94, 0.1); color: var(--danger); }
         .delete-btn:active { transform: scale(0.9); }
 
         .status-badge {
@@ -201,11 +201,9 @@
         .loading-text { text-align: center; color: var(--accent); font-weight: bold; padding: 40px; animation: pulse 1.5s infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 
-        /* 手機版排版微調 */
         @media (max-width: 500px) {
             .card-inputs { grid-template-columns: 1fr; }
             .header-top { flex-direction: column; align-items: flex-start; gap: 8px; }
-            /* 在小螢幕時，控制列依舊維持 flex-end (靠右)，且空間不足時自動往下換行 */
             .header-controls { width: 100%; justify-content: flex-end; }
         }
     </style>
@@ -220,6 +218,9 @@
                 <span id="clock">00:00:00</span>
             </div>
             <div class="header-controls">
+                <!-- 救援資料按鈕 -->
+                <button class="header-btn btn-rescue" onclick="recoverLocalData()">💾 找回舊資料</button>
+                
                 <button class="header-btn" onclick="syncData()">🔄 刷新資料</button>
                 <button class="header-btn" onclick="sortItems()">↕️ 重新排列</button>
                 <button id="sound-btn" class="header-btn" onclick="toggleSound()">🔔 提示音</button>
@@ -234,11 +235,10 @@
 
     <script>
         // ==========================================
-        // 🚨 請將下方引號內的網址替換為你剛才取得的 Web App URL 🚨
+        // 🚨 請將下方引號內的網址替換為你的 Google Web App URL 🚨
         // ==========================================
         const API_URL = 'https://script.google.com/macros/s/AKfycbwNsIOJ0bNdeajO1-Bk_LrLvNut-VpZ1gbDQkXx-hIZoP62SwI3Cc5Zah9SCANav2gN/exec';
 
-        // 🔒 檢查手機裡有沒有存過密碼，沒有的話就跳出視窗詢問
         let appPassword = localStorage.getItem('myAppPassword');
         if (!appPassword) {
             appPassword = prompt("請輸入系統存取密碼：");
@@ -294,17 +294,32 @@
         }
 
         // ==========================================
-        // 雲端資料同步邏輯 (加上密碼驗證)
+        // 資料救援系統 (將手機原本的舊資料上傳至雲端)
+        // ==========================================
+        window.recoverLocalData = function() {
+            const localData = localStorage.getItem('aiTrackerData'); // 這是原本舊版的存檔鑰匙
+            if (localData) {
+                if (confirm("✅ 找到你手機裡的舊資料了！要將它覆蓋到現在的 Google 雲端上嗎？")) {
+                    trackerData = JSON.parse(localData);
+                    saveData(); 
+                    alert("🎉 舊資料已成功上傳雲端！如果所有設備都同步了，你可以把這個黃色按鈕的程式碼刪除。");
+                }
+            } else {
+                alert("❌ 找不到舊資料，可能之前已經被清除，或你現在用的是不同瀏覽器。");
+            }
+        };
+
+        // ==========================================
+        // 雲端資料同步邏輯 
         // ==========================================
         async function loadData() {
             try {
-                // GET 請求：把密碼當作參數 (pwd) 附在網址後面
                 const response = await fetch(`${API_URL}?pwd=${appPassword}`);
                 const data = await response.json();
                 
                 if (data.error) {
                     alert("存取失敗：" + data.error + "\n請重新整理網頁並輸入正確密碼。");
-                    localStorage.removeItem('myAppPassword'); // 密碼錯誤就清空，讓使用者下次可以重輸
+                    localStorage.removeItem('myAppPassword'); 
                     return;
                 }
 
@@ -323,9 +338,8 @@
         }
 
         async function saveData() {
-            renderList();
+            renderList(); // 先更新畫面，讓使用者操作順暢
             try {
-                // POST 請求：把密碼 (pwd) 和真實資料 (payload) 一起打包送給雲端
                 await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -338,6 +352,7 @@
                 console.error('儲存失敗:', error);
             }
         }
+
         window.syncData = function() {
             document.getElementById('tracker-list').innerHTML = '<div class="loading-text">重新同步中...</div>';
             loadData();
@@ -357,10 +372,12 @@
 
                 const card = document.createElement('div');
                 card.className = 'account-card';
+                
+                // 這裡的 oninput 改成 onchange，並且加上 placeholder="輸入名稱"
                 card.innerHTML = `
                 <div class="card-top">
                     <div style="display: flex; gap: 8px; align-items: center;">
-                        <input type="text" class="account-name-input" value="${item.id}" onchange="updateField(${index}, 'id', this.value)">
+                        <input type="text" class="account-name-input" placeholder="輸入名稱" value="${item.id}" onchange="updateField(${index}, 'id', this.value)">
                         <button class="delete-btn" onclick="removeAccount(${index})">×</button>
                     </div>
                     <div class="status-badge ${badgeClass}" onclick="toggleStatus(${index})">
@@ -369,7 +386,7 @@
                 </div>
                 <div class="card-inputs">
                     <input type="time" value="${item.time}" onchange="updateField(${index}, 'time', this.value)">
-                    <input type="text" value="${item.task}" placeholder="輸入任務內容..." oninput="updateField(${index}, 'task', this.value)">
+                    <input type="text" value="${item.task}" placeholder="輸入任務內容..." onchange="updateField(${index}, 'task', this.value)">
                 </div>
                 <textarea placeholder="當前進度或接下來要完成的部分..." onchange="updateField(${index}, 'notes', this.value)">${item.notes}</textarea>
                 `;
@@ -419,12 +436,12 @@
         window.updateField = function (index, field, value) {
             trackerData[index][field] = value;
             if (field === 'time') trackerData[index].unlockTimestamp = getNextOccurrence(value);
-            // 筆記欄位為了避免每打一個字就上傳雲端，已將 oninput 改為 onchange (失去焦點時才存檔)
             saveData(); 
         };
 
         window.addAccount = function () {
-            trackerData.push({ id: '新帳號', time: '', task: '', notes: '', unlockTimestamp: 0 });
+            // 新增時，給予空白的 id (名稱)
+            trackerData.push({ id: '', time: '', task: '', notes: '', unlockTimestamp: 0 });
             saveData();
             setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 100);
         };
@@ -436,7 +453,6 @@
             }
         };
 
-        // 強制 24 小時制時鐘顯示
         function checkStatus() {
             const now = new Date();
             const hh = String(now.getHours()).padStart(2, '0');
@@ -456,13 +472,13 @@
                 }
             });
 
-            if (needRender) { saveData(); }
+            // 這裡不再呼叫 saveData() 避免打字時強制更新跳掉
+            if (needRender) { renderList(); }
             if (playSound) playAlertSound();
         }
 
-        // 啟動應用程式
         setInterval(checkStatus, 1000);
-        loadData(); // 初始載入雲端資料
+        loadData(); 
     </script>
 
 </body>
