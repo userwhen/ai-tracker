@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -17,200 +16,66 @@
             --waiting: #fbbf24;      
             --input-bg: #020617;     
             --button-bg: #334155;    
-            
             --name-color: #818cf8;   
             --danger: #f43f5e;       
+            --tag-active: #818cf8;   /* 標籤亮起時的顏色 */
         }
-
-        body {
-            font-family: system-ui, -apple-system, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            padding: 16px;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            touch-action: manipulation;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 700px;
-        }
-
-        .page-header {
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            margin-bottom: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .header-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        h2 {
-            margin: 0;
-            color: var(--accent);
-            font-size: 1.5rem;
-        }
-
-        #clock {
-            font-size: 1.2rem;
-            color: var(--text-muted);
-            font-family: monospace;
-            font-weight: bold;
-        }
-
-        .header-controls {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: flex-end;
-            gap: 10px;
-        }
-
-        .header-btn {
-            background: var(--button-bg);
-            color: var(--text-main);
-            border: none;
-            padding: 10px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: bold;
-            transition: background 0.2s, transform 0.1s;
-            white-space: nowrap;
-        }
-
+        body { font-family: system-ui, -apple-system, sans-serif; background-color: var(--bg-color); color: var(--text-main); padding: 16px; margin: 0; display: flex; justify-content: center; touch-action: manipulation; }
+        .container { width: 100%; max-width: 700px; }
+        .page-header { background: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); margin-bottom: 20px; display: flex; flex-direction: column; gap: 16px; }
+        .header-top { display: flex; justify-content: space-between; align-items: center; }
+        h2 { margin: 0; color: var(--accent); font-size: 1.5rem; }
+        #clock { font-size: 1.2rem; color: var(--text-muted); font-family: monospace; font-weight: bold; }
+        
+        .header-controls { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 10px; }
+        .header-btn { background: var(--button-bg); color: var(--text-main); border: none; padding: 10px 16px; border-radius: 8px; cursor: pointer; font-size: 1rem; font-weight: bold; transition: background 0.2s, transform 0.1s; white-space: nowrap; }
         .header-btn:active { transform: scale(0.95); }
         .header-btn.muted { opacity: 0.5; text-decoration: line-through; }
         .btn-add { background: var(--accent); color: #020617; }
         
-        /* 救援舊資料專用按鈕樣式 */
-        .btn-rescue { background: #fbbf24; color: #020617; }
-
-        #tracker-list {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .account-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 16px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-            transition: 0.3s;
-        }
-
-        .card-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-            border-bottom: 1px dashed var(--border);
-            padding-bottom: 12px;
-        }
-
-        .account-name-input {
-            font-weight: bold;
-            color: var(--name-color);
-            font-size: 1.1rem;
-            background: var(--input-bg);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            padding: 6px 10px;
-            width: 100px;
-            font-family: inherit;
-        }
+        #tracker-list { display: flex; flex-direction: column; gap: 16px; padding-bottom: 40px; }
+        .account-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 16px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); transition: 0.3s; }
+        .card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; border-bottom: 1px dashed var(--border); padding-bottom: 12px; gap: 8px; }
         
-        /* 讓 Placeholder (底部提示文字) 變得柔和 */
-        .account-name-input::placeholder {
-            color: var(--text-muted);
-            font-weight: normal;
-            font-size: 0.9rem;
-        }
-
-        .account-name-input:focus { outline: none; border-color: var(--accent); }
-
-        .delete-btn {
-            background: transparent;          
-            border: none;                     
-            color: #64748b;                   
-            font-size: 1.4rem;                
-            border-radius: 6px;
-            width: 34px;
-            height: 34px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            transition: all 0.2s ease;        
-        }
-
+        /* 帳號與平台名稱輸入區 */
+        .account-info { display: flex; flex-direction: column; gap: 6px; }
+        .account-name-input { font-weight: bold; color: var(--name-color); font-size: 1.1rem; background: var(--input-bg); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; width: 100px; font-family: inherit; }
+        .platform-input { font-size: 0.85rem; color: var(--text-muted); background: transparent; border: 1px dashed var(--border); border-radius: 4px; padding: 4px 6px; width: 90px; }
+        .account-name-input::placeholder, .platform-input::placeholder { color: var(--border); }
+        .account-name-input:focus, .platform-input:focus { outline: none; border-color: var(--accent); color: var(--text-main); }
+        
+        .delete-btn { background: transparent; border: none; color: #64748b; font-size: 1.4rem; border-radius: 6px; width: 34px; height: 34px; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: all 0.2s ease; margin-left: 8px; }
         .delete-btn:hover { background: rgba(244, 63, 94, 0.1); color: var(--danger); }
         .delete-btn:active { transform: scale(0.9); }
-
-        .status-badge {
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 1rem;
-            font-weight: bold;
-            text-align: center;
-            cursor: pointer;
-            user-select: none;
-            transition: transform 0.1s, filter 0.2s;
-        }
-
+        
+        .status-badge { padding: 8px 16px; border-radius: 20px; font-size: 1rem; font-weight: bold; text-align: center; cursor: pointer; user-select: none; transition: transform 0.1s, filter 0.2s; white-space: nowrap; margin-left: auto; }
         .status-badge:active { transform: scale(0.95); }
         .status-ready { background: var(--ready); color: #11111b; }
         .status-waiting { background: var(--waiting); color: #11111b; }
-
-        .card-inputs {
-            display: grid;
-            grid-template-columns: 1fr 2fr;
-            gap: 12px;
-            margin-bottom: 12px;
-        }
-
-        input[type="time"],
-        input[type="text"]:not(.account-name-input),
-        textarea {
-            background: var(--input-bg);
-            color: var(--text-main);
-            border: 1px solid var(--border);
-            padding: 12px;
-            border-radius: 8px;
-            width: 100%;
-            box-sizing: border-box;
-            font-size: 1.1rem;
-        }
-
+        
+        .card-inputs { display: grid; grid-template-columns: 1fr 2fr; gap: 12px; margin-bottom: 12px; }
+        input[type="time"], input[type="text"]:not(.account-name-input):not(.platform-input), textarea { background: var(--input-bg); color: var(--text-main); border: 1px solid var(--border); padding: 12px; border-radius: 8px; width: 100%; box-sizing: border-box; font-size: 1.1rem; }
         input[type="time"] { font-family: monospace; }
         textarea { resize: vertical; min-height: 60px; font-family: inherit; border: 1px dashed var(--border); line-height: 1.4; }
         input:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2); }
+        
+        /* 快速標記按鈕區 (Tags) */
+        .tags-container { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+        .tag-btn { background: transparent; border: 1px solid var(--border); color: var(--text-muted); padding: 6px 12px; border-radius: 16px; font-size: 0.85rem; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 4px; }
+        .tag-btn.active { background: rgba(129, 140, 248, 0.15); border-color: var(--tag-active); color: var(--tag-active); font-weight: bold; }
+        .tag-btn:active { transform: scale(0.95); }
 
         .loading-text { text-align: center; color: var(--accent); font-weight: bold; padding: 40px; animation: pulse 1.5s infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-
-        @media (max-width: 500px) {
-            .card-inputs { grid-template-columns: 1fr; }
-            .header-top { flex-direction: column; align-items: flex-start; gap: 8px; }
-            .header-controls { width: 100%; justify-content: flex-end; }
+        
+        @media (max-width: 500px) { 
+            .card-inputs { grid-template-columns: 1fr; } 
+            .header-top { flex-direction: column; align-items: flex-start; gap: 8px; } 
+            .header-controls { width: 100%; justify-content: flex-end; } 
         }
     </style>
 </head>
-
 <body>
-
     <div class="container">
         <div class="page-header">
             <div class="header-top">
@@ -218,16 +83,11 @@
                 <span id="clock">00:00:00</span>
             </div>
             <div class="header-controls">
-                <!-- 救援資料按鈕 -->
-                <button class="header-btn btn-rescue" onclick="recoverLocalData()">💾 找回舊資料</button>
-                
-                <button class="header-btn" onclick="syncData()">🔄 刷新資料</button>
                 <button class="header-btn" onclick="sortItems()">↕️ 重新排列</button>
                 <button id="sound-btn" class="header-btn" onclick="toggleSound()">🔔 提示音</button>
                 <button class="header-btn btn-add" onclick="addAccount()">➕ 新增</button>
             </div>
         </div>
-
         <div id="tracker-list">
             <div class="loading-text">雲端資料同步中...</div>
         </div>
@@ -235,16 +95,14 @@
 
     <script>
         // ==========================================
-        // 🚨 請將下方引號內的網址替換為你的 Google Web App URL 🚨
+        // 🚨 請貼上你的 Google Apps Script URL
         // ==========================================
         const API_URL = 'https://script.google.com/macros/s/AKfycbwNsIOJ0bNdeajO1-Bk_LrLvNut-VpZ1gbDQkXx-hIZoP62SwI3Cc5Zah9SCANav2gN/exec';
 
         let appPassword = localStorage.getItem('myAppPassword');
         if (!appPassword) {
             appPassword = prompt("請輸入系統存取密碼：");
-            if (appPassword) {
-                localStorage.setItem('myAppPassword', appPassword);
-            }
+            if (appPassword) { localStorage.setItem('myAppPassword', appPassword); }
         }
 
         let audioCtx = null;
@@ -293,74 +151,48 @@
             playTone(1046.5, now + 0.15, 0.8);
         }
 
-        // ==========================================
-        // 資料救援系統 (將手機原本的舊資料上傳至雲端)
-        // ==========================================
-        window.recoverLocalData = function() {
-            const localData = localStorage.getItem('aiTrackerData'); // 這是原本舊版的存檔鑰匙
-            if (localData) {
-                if (confirm("✅ 找到你手機裡的舊資料了！要將它覆蓋到現在的 Google 雲端上嗎？")) {
-                    trackerData = JSON.parse(localData);
-                    saveData(); 
-                    alert("🎉 舊資料已成功上傳雲端！如果所有設備都同步了，你可以把這個黃色按鈕的程式碼刪除。");
-                }
-            } else {
-                alert("❌ 找不到舊資料，可能之前已經被清除，或你現在用的是不同瀏覽器。");
-            }
-        };
-
-        // ==========================================
-        // 雲端資料同步邏輯 
-        // ==========================================
         async function loadData() {
             try {
                 const response = await fetch(`${API_URL}?pwd=${appPassword}`);
                 const data = await response.json();
                 
                 if (data.error) {
-                    alert("存取失敗：" + data.error + "\n請重新整理網頁並輸入正確密碼。");
+                    alert("存取失敗：" + data.error + "\n密碼錯誤，請重新整理網頁並輸入正確密碼。");
                     localStorage.removeItem('myAppPassword'); 
                     return;
                 }
 
                 if (Array.isArray(data) && data.length > 0) {
-                    trackerData = data;
+                    // 為了相容舊資料，若無新欄位則補上預設值
+                    trackerData = data.map(item => ({
+                        ...item,
+                        platform: item.platform || '',
+                        needContinue: !!item.needContinue,
+                        needUpdate: !!item.needUpdate
+                    }));
                 } else {
-                    trackerData = [
-                        { id: 'SI', time: '01:40', task: 'TASK', notes: '', unlockTimestamp: 0 }
-                    ];
+                    trackerData = [];
                 }
                 renderList();
             } catch (error) {
                 console.error('讀取失敗:', error);
-                document.getElementById('tracker-list').innerHTML = '<div class="loading-text" style="color:var(--danger)">⚠️ 雲端資料讀取失敗，請檢查網址或網路。</div>';
+                document.getElementById('tracker-list').innerHTML = '<div class="loading-text" style="color:var(--danger)">⚠️ 讀取失敗，請檢查 API 網址或網路。</div>';
             }
         }
 
         async function saveData() {
-            renderList(); // 先更新畫面，讓使用者操作順暢
+            renderList(); // 保存時刷新畫面 UI 狀態
             try {
                 await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify({
-                        pwd: appPassword,
-                        payload: trackerData
-                    })
+                    body: JSON.stringify({ pwd: appPassword, payload: trackerData })
                 });
             } catch (error) {
                 console.error('儲存失敗:', error);
             }
         }
 
-        window.syncData = function() {
-            document.getElementById('tracker-list').innerHTML = '<div class="loading-text">重新同步中...</div>';
-            loadData();
-        };
-
-        // ==========================================
-        // UI 渲染與事件處理
-        // ==========================================
         function renderList() {
             const container = document.getElementById('tracker-list');
             container.innerHTML = '';
@@ -372,23 +204,35 @@
 
                 const card = document.createElement('div');
                 card.className = 'account-card';
-                
-                // 這裡的 oninput 改成 onchange，並且加上 placeholder="輸入名稱"
                 card.innerHTML = `
                 <div class="card-top">
-                    <div style="display: flex; gap: 8px; align-items: center;">
-                        <input type="text" class="account-name-input" placeholder="輸入名稱" value="${item.id}" onchange="updateField(${index}, 'id', this.value)">
+                    <div style="display: flex; align-items: flex-start;">
+                        <div class="account-info">
+                            <input type="text" class="account-name-input" placeholder="帳號名稱" value="${item.id}" onchange="updateField(${index}, 'id', this.value)">
+                            <input type="text" class="platform-input" placeholder="平台(如Chrome)" value="${item.platform || ''}" onchange="updateField(${index}, 'platform', this.value)">
+                        </div>
                         <button class="delete-btn" onclick="removeAccount(${index})">×</button>
                     </div>
                     <div class="status-badge ${badgeClass}" onclick="toggleStatus(${index})">
                         ${badgeText}
                     </div>
                 </div>
+                
                 <div class="card-inputs">
                     <input type="time" value="${item.time}" onchange="updateField(${index}, 'time', this.value)">
-                    <input type="text" value="${item.task}" placeholder="輸入任務內容..." onchange="updateField(${index}, 'task', this.value)">
+                    <input type="text" value="${item.task}" placeholder="當前任務目標..." onchange="updateField(${index}, 'task', this.value)">
                 </div>
-                <textarea placeholder="當前進度或接下來要完成的部分..." onchange="updateField(${index}, 'notes', this.value)">${item.notes}</textarea>
+
+                <div class="tags-container">
+                    <button class="tag-btn ${item.needContinue ? 'active' : ''}" onclick="toggleTag(${index}, 'needContinue')">
+                        ${item.needContinue ? '➡️ 待按繼續' : '➕ 按繼續'}
+                    </button>
+                    <button class="tag-btn ${item.needUpdate ? 'active' : ''}" onclick="toggleTag(${index}, 'needUpdate')">
+                        ${item.needUpdate ? '📝 紀錄未更新' : '➕ 紀錄狀態'}
+                    </button>
+                </div>
+
+                <textarea placeholder="詳細備註或交接進度..." onchange="updateField(${index}, 'notes', this.value)">${item.notes}</textarea>
                 `;
                 container.appendChild(card);
             });
@@ -419,14 +263,24 @@
         window.toggleStatus = function (index) {
             initAudio();
             const item = trackerData[index];
-
             if (item.unlockTimestamp > 0 && Date.now() < item.unlockTimestamp) {
+                // 手動解除冷卻
                 item.unlockTimestamp = 0; 
             } else {
+                // 啟動冷卻：目前時間 +5 小時，並進位到下一個 10 分鐘
                 const targetDate = new Date();
                 targetDate.setHours(targetDate.getHours() + 5);
+                
+                let mins = targetDate.getMinutes();
+                let remainder = mins % 10;
+                if (remainder > 0) {
+                    targetDate.setMinutes(mins + (10 - remainder));
+                }
+                targetDate.setSeconds(0);
+
                 const hh = String(targetDate.getHours()).padStart(2, '0');
                 const mm = String(targetDate.getMinutes()).padStart(2, '0');
+                
                 item.time = `${hh}:${mm}`;
                 item.unlockTimestamp = targetDate.getTime();
             }
@@ -439,9 +293,17 @@
             saveData(); 
         };
 
+        // 處理快速標記按鈕切換
+        window.toggleTag = function (index, tagField) {
+            trackerData[index][tagField] = !trackerData[index][tagField];
+            saveData();
+        };
+
         window.addAccount = function () {
-            // 新增時，給予空白的 id (名稱)
-            trackerData.push({ id: '', time: '', task: '', notes: '', unlockTimestamp: 0 });
+            trackerData.push({ 
+                id: '', platform: '', time: '', task: '', notes: '', 
+                unlockTimestamp: 0, needContinue: false, needUpdate: false 
+            });
             saveData();
             setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 100);
         };
@@ -472,7 +334,6 @@
                 }
             });
 
-            // 這裡不再呼叫 saveData() 避免打字時強制更新跳掉
             if (needRender) { renderList(); }
             if (playSound) playAlertSound();
         }
@@ -480,6 +341,5 @@
         setInterval(checkStatus, 1000);
         loadData(); 
     </script>
-
 </body>
 </html>
