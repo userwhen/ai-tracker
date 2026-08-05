@@ -4,22 +4,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AI 額度恢復追蹤器</title>
+    <title>AI 額度恢復追蹤器 (雲端共用版)</title>
     <style>
         :root {
-            --bg-color: #0f172a;     /* 深邃的夜空藍背景 */
-            --card-bg: #1e293b;      /* 卡片：帶有灰度的藏青色 */
-            --text-main: #f1f5f9;    /* 主要文字：清澈的雪白 */
-            --text-muted: #94a3b8;   /* 次要文字：柔和的灰藍色 */
-            --accent: #38bdf8;       /* 強調色：明亮但不刺眼的天際藍 */
-            --border: #334155;       /* 邊界：低對比的深灰藍 */
-            --ready: #5eead4;        /* 可使用：清新的薄荷藍綠 */
-            --waiting: #fbbf24;      /* 冷卻中：柔和的晨曦黃 */
-            --input-bg: #020617;     /* 輸入框：極深的午夜藍讓視覺下沉 */
-            --button-bg: #334155;    /* 按鈕預設底色 */
+            --bg-color: #0f172a;     
+            --card-bg: #1e293b;      
+            --text-main: #f1f5f9;    
+            --text-muted: #94a3b8;   
+            --accent: #38bdf8;       
+            --border: #334155;       
+            --ready: #5eead4;        
+            --waiting: #fbbf24;      
+            --input-bg: #020617;     
+            --button-bg: #334155;    
             
-            --name-color: #818cf8;   /* 帳號名稱：優雅的長春花藍（帶點紫） */
-            --danger: #f43f5e;       /* 刪除色：不刺眼的玫瑰紅 */
+            --name-color: #818cf8;   
+            --danger: #f43f5e;       
         }
 
         body {
@@ -38,28 +38,28 @@
             max-width: 700px;
         }
 
+        /* 頂部 Header 自適應與靠右排版 */
         .page-header {
             background: var(--card-bg);
             padding: 20px;
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
             margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
         }
 
-        h2 {
-            margin: 0 0 16px 0;
-            color: var(--accent);
+        .header-top {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 1.5rem;
         }
 
-        .header-controls {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 12px;
+        h2 {
+            margin: 0;
+            color: var(--accent);
+            font-size: 1.5rem;
         }
 
         #clock {
@@ -67,6 +67,14 @@
             color: var(--text-muted);
             font-family: monospace;
             font-weight: bold;
+        }
+
+        .header-controls {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: flex-end; /* 強制按鈕群組靠右 */
+            gap: 10px;
         }
 
         .header-btn {
@@ -79,17 +87,19 @@
             font-size: 1rem;
             font-weight: bold;
             transition: background 0.2s, transform 0.1s;
+            white-space: nowrap; /* 避免按鈕文字被折行 */
         }
 
         .header-btn:active {
             transform: scale(0.95);
         }
-
         .header-btn.muted {
             opacity: 0.5;
             text-decoration: line-through;
         }
+        .btn-add { background: var(--accent); color: #020617; }
 
+        /* 卡片佈局 */
         #tracker-list {
             display: flex;
             flex-direction: column;
@@ -102,6 +112,7 @@
             border-radius: 12px;
             padding: 16px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            transition: 0.3s;
         }
 
         .card-top {
@@ -115,7 +126,7 @@
 
         .account-name-input {
             font-weight: bold;
-            color: var(--name-color); /* <--- 只改了這一行 */
+            color: var(--name-color);
             font-size: 1.1rem;
             background: var(--input-bg);
             border: 1px solid var(--border);
@@ -125,16 +136,13 @@
             font-family: inherit;
         }
 
-        .account-name-input:focus {
-            outline: none;
-            border-color: var(--accent);
-        }
+        .account-name-input:focus { outline: none; border-color: var(--accent); }
 
         .delete-btn {
-            background: transparent;          /* 預設透明背景，不搶視覺 */
-            border: none;                     /* 拿掉生硬的邊框 */
-            color: #64748b;                   /* 預設是融入背景的灰藍色 */
-            font-size: 1.4rem;                /* 符號稍微放大讓線條更細緻 */
+            background: transparent;          
+            border: none;                     
+            color: #64748b;                   
+            font-size: 1.4rem;                
             border-radius: 6px;
             width: 34px;
             height: 34px;
@@ -142,18 +150,14 @@
             justify-content: center;
             align-items: center;
             cursor: pointer;
-            transition: all 0.2s ease;        /* 讓顏色變化有柔和的漸變感 */
+            transition: all 0.2s ease;        
         }
 
-        /* 只有滑鼠碰到，或手指點擊時，才會亮起柔和的提示色 */
         .delete-btn:hover {
             background: rgba(244, 63, 94, 0.1); 
             color: var(--danger);               
         }
-
-        .delete-btn:active {
-            transform: scale(0.9);
-        }
+        .delete-btn:active { transform: scale(0.9); }
 
         .status-badge {
             padding: 8px 16px;
@@ -166,40 +170,15 @@
             transition: transform 0.1s, filter 0.2s;
         }
 
-        .status-badge:active {
-            transform: scale(0.95);
-        }
-
-        .status-ready {
-            background: var(--ready);
-            color: #11111b;
-        }
-
-        .status-waiting {
-            background: var(--waiting);
-            color: #11111b;
-        }
+        .status-badge:active { transform: scale(0.95); }
+        .status-ready { background: var(--ready); color: #11111b; }
+        .status-waiting { background: var(--waiting); color: #11111b; }
 
         .card-inputs {
             display: grid;
             grid-template-columns: 1fr 2fr;
             gap: 12px;
             margin-bottom: 12px;
-        }
-
-        @media (max-width: 500px) {
-            .card-inputs {
-                grid-template-columns: 1fr;
-            }
-            h2 {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 8px;
-            }
-            .header-controls {
-                width: 100%;
-                justify-content: space-between;
-            }
         }
 
         input[type="time"],
@@ -215,23 +194,19 @@
             font-size: 1.1rem;
         }
 
-        input[type="time"] {
-            font-family: monospace;
-        }
+        input[type="time"] { font-family: monospace; }
+        textarea { resize: vertical; min-height: 60px; font-family: inherit; border: 1px dashed var(--border); line-height: 1.4; }
+        input:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2); }
 
-        textarea {
-            resize: vertical;
-            min-height: 60px;
-            font-family: inherit;
-            border: 1px dashed var(--border);
-            line-height: 1.4;
-        }
+        .loading-text { text-align: center; color: var(--accent); font-weight: bold; padding: 40px; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 
-        input:focus,
-        textarea:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 2px rgba(137, 180, 250, 0.2);
+        /* 手機版排版微調 */
+        @media (max-width: 500px) {
+            .card-inputs { grid-template-columns: 1fr; }
+            .header-top { flex-direction: column; align-items: flex-start; gap: 8px; }
+            /* 在小螢幕時，控制列依舊維持 flex-end (靠右)，且空間不足時自動往下換行 */
+            .header-controls { width: 100%; justify-content: flex-end; }
         }
     </style>
 </head>
@@ -240,24 +215,41 @@
 
     <div class="container">
         <div class="page-header">
-            <h2>
-                AI 帳號調度中心
+            <div class="header-top">
+                <h2>AI 帳號調度中心</h2>
                 <span id="clock">00:00:00</span>
-            </h2>
+            </div>
             <div class="header-controls">
+                <button class="header-btn" onclick="syncData()">🔄 刷新資料</button>
                 <button class="header-btn" onclick="sortItems()">↕️ 重新排列</button>
                 <button id="sound-btn" class="header-btn" onclick="toggleSound()">🔔 提示音</button>
-                <button class="header-btn" onclick="addAccount()" style="background: var(--accent); color: #11111b;">➕ 新增</button>
+                <button class="header-btn btn-add" onclick="addAccount()">➕ 新增</button>
             </div>
         </div>
 
-        <!-- 列表容器 -->
-        <div id="tracker-list"></div>
+        <div id="tracker-list">
+            <div class="loading-text">雲端資料同步中...</div>
+        </div>
     </div>
 
     <script>
+        // ==========================================
+        // 🚨 請將下方引號內的網址替換為你剛才取得的 Web App URL 🚨
+        // ==========================================
+        const API_URL = 'https://script.google.com/macros/s/AKfycbwNsIOJ0bNdeajO1-Bk_LrLvNut-VpZ1gbDQkXx-hIZoP62SwI3Cc5Zah9SCANav2gN/exec';
+
+        // 🔒 檢查手機裡有沒有存過密碼，沒有的話就跳出視窗詢問
+        let appPassword = localStorage.getItem('myAppPassword');
+        if (!appPassword) {
+            appPassword = prompt("請輸入系統存取密碼：");
+            if (appPassword) {
+                localStorage.setItem('myAppPassword', appPassword);
+            }
+        }
+
         let audioCtx = null;
         let isSoundEnabled = true;
+        let trackerData = [];
 
         function initAudio() {
             if (!audioCtx) {
@@ -301,21 +293,59 @@
             playTone(1046.5, now + 0.15, 0.8);
         }
 
-        const defaultData = [
-            { id: 'SI', time: '01:40', task: 'TASK', notes: '', unlockTimestamp: 0 },
-            { id: '18', time: '04:00', task: '全專案', notes: '', unlockTimestamp: 0 },
-            { id: 'N1', time: '01:30', task: '劇情', notes: '', unlockTimestamp: 0 },
-            { id: 'GR', time: '01:40', task: '教學', notes: '', unlockTimestamp: 0 },
-            { id: 'EC', time: '10:20', task: 'SETTING', notes: '', unlockTimestamp: 0 }
-        ];
+        // ==========================================
+        // 雲端資料同步邏輯 (加上密碼驗證)
+        // ==========================================
+        async function loadData() {
+            try {
+                // GET 請求：把密碼當作參數 (pwd) 附在網址後面
+                const response = await fetch(`${API_URL}?pwd=${appPassword}`);
+                const data = await response.json();
+                
+                if (data.error) {
+                    alert("存取失敗：" + data.error + "\n請重新整理網頁並輸入正確密碼。");
+                    localStorage.removeItem('myAppPassword'); // 密碼錯誤就清空，讓使用者下次可以重輸
+                    return;
+                }
 
-        let trackerData = JSON.parse(localStorage.getItem('aiTrackerData')) || defaultData;
-        trackerData = trackerData.map(item => ({
-            ...item, notes: item.notes || '', unlockTimestamp: item.unlockTimestamp || 0
-        }));
+                if (Array.isArray(data) && data.length > 0) {
+                    trackerData = data;
+                } else {
+                    trackerData = [
+                        { id: 'SI', time: '01:40', task: 'TASK', notes: '', unlockTimestamp: 0 }
+                    ];
+                }
+                renderList();
+            } catch (error) {
+                console.error('讀取失敗:', error);
+                document.getElementById('tracker-list').innerHTML = '<div class="loading-text" style="color:var(--danger)">⚠️ 雲端資料讀取失敗，請檢查網址或網路。</div>';
+            }
+        }
 
-        function saveData() { localStorage.setItem('aiTrackerData', JSON.stringify(trackerData)); }
+        async function saveData() {
+            renderList();
+            try {
+                // POST 請求：把密碼 (pwd) 和真實資料 (payload) 一起打包送給雲端
+                await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({
+                        pwd: appPassword,
+                        payload: trackerData
+                    })
+                });
+            } catch (error) {
+                console.error('儲存失敗:', error);
+            }
+        }
+        window.syncData = function() {
+            document.getElementById('tracker-list').innerHTML = '<div class="loading-text">重新同步中...</div>';
+            loadData();
+        };
 
+        // ==========================================
+        // UI 渲染與事件處理
+        // ==========================================
         function renderList() {
             const container = document.getElementById('tracker-list');
             container.innerHTML = '';
@@ -341,7 +371,7 @@
                     <input type="time" value="${item.time}" onchange="updateField(${index}, 'time', this.value)">
                     <input type="text" value="${item.task}" placeholder="輸入任務內容..." oninput="updateField(${index}, 'task', this.value)">
                 </div>
-                <textarea placeholder="當前進度或接下來要完成的部分..." oninput="updateField(${index}, 'notes', this.value)">${item.notes}</textarea>
+                <textarea placeholder="當前進度或接下來要完成的部分..." onchange="updateField(${index}, 'notes', this.value)">${item.notes}</textarea>
                 `;
                 container.appendChild(card);
             });
@@ -367,7 +397,6 @@
                 return 0;
             });
             saveData();
-            renderList();
         };
 
         window.toggleStatus = function (index) {
@@ -385,53 +414,56 @@
                 item.unlockTimestamp = targetDate.getTime();
             }
             saveData();
-            renderList();
         };
 
         window.updateField = function (index, field, value) {
             trackerData[index][field] = value;
             if (field === 'time') trackerData[index].unlockTimestamp = getNextOccurrence(value);
-            saveData();
+            // 筆記欄位為了避免每打一個字就上傳雲端，已將 oninput 改為 onchange (失去焦點時才存檔)
+            saveData(); 
         };
 
         window.addAccount = function () {
             trackerData.push({ id: '新帳號', time: '', task: '', notes: '', unlockTimestamp: 0 });
             saveData();
-            renderList();
-            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+            setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 100);
         };
 
         window.removeAccount = function (index) {
             if (confirm('確定要刪除這個帳號嗎？')) {
                 trackerData.splice(index, 1);
                 saveData();
-                renderList();
             }
         };
 
+        // 強制 24 小時制時鐘顯示
         function checkStatus() {
-            const now = Date.now();
-            document.getElementById('clock').innerText = new Date().toLocaleTimeString('zh-TW', { hour12: false });
+            const now = new Date();
+            const hh = String(now.getHours()).padStart(2, '0');
+            const mm = String(now.getMinutes()).padStart(2, '0');
+            const ss = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('clock').innerText = `${hh}:${mm}:${ss}`;
 
             let needRender = false;
             let playSound = false;
+            const nowTime = now.getTime();
 
             trackerData.forEach((item, index) => {
-                if (item.unlockTimestamp > 0 && now >= item.unlockTimestamp) {
+                if (item.unlockTimestamp > 0 && nowTime >= item.unlockTimestamp) {
                     item.unlockTimestamp = 0;
                     needRender = true;
                     playSound = true;
                 }
             });
 
-            if (needRender) { saveData(); renderList(); }
+            if (needRender) { saveData(); }
             if (playSound) playAlertSound();
         }
 
-        renderList();
+        // 啟動應用程式
         setInterval(checkStatus, 1000);
+        loadData(); // 初始載入雲端資料
     </script>
 
 </body>
-
 </html>
