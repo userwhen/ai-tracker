@@ -18,7 +18,8 @@
             --button-bg: #334155;    
             --name-color: #818cf8;   
             --danger: #f43f5e;       
-            --tag-active: #818cf8;   /* 標籤亮起時的顏色 */
+            --tag-continue: #818cf8; /* 繼續按鈕亮起色 */
+            --tag-recorded: #a6e3a1; /* 已紀錄亮起綠色 */
         }
         body { font-family: system-ui, -apple-system, sans-serif; background-color: var(--bg-color); color: var(--text-main); padding: 16px; margin: 0; display: flex; justify-content: center; touch-action: manipulation; }
         .container { width: 100%; max-width: 700px; }
@@ -30,40 +31,46 @@
         .header-controls { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 10px; }
         .header-btn { background: var(--button-bg); color: var(--text-main); border: none; padding: 10px 16px; border-radius: 8px; cursor: pointer; font-size: 1rem; font-weight: bold; transition: background 0.2s, transform 0.1s; white-space: nowrap; }
         .header-btn:active { transform: scale(0.95); }
-        .header-btn.muted { opacity: 0.5; text-decoration: line-through; }
         .btn-add { background: var(--accent); color: #020617; }
         
         #tracker-list { display: flex; flex-direction: column; gap: 16px; padding-bottom: 40px; }
         .account-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 16px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); transition: 0.3s; }
-        .card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; border-bottom: 1px dashed var(--border); padding-bottom: 12px; gap: 8px; }
         
-        /* 帳號與平台名稱輸入區 */
-        .account-info { display: flex; flex-direction: column; gap: 6px; }
-        .account-name-input { font-weight: bold; color: var(--name-color); font-size: 1.1rem; background: var(--input-bg); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; width: 100px; font-family: inherit; }
-        .platform-input { font-size: 0.85rem; color: var(--text-muted); background: transparent; border: 1px dashed var(--border); border-radius: 4px; padding: 4px 6px; width: 90px; }
-        .account-name-input::placeholder, .platform-input::placeholder { color: var(--border); }
-        .account-name-input:focus, .platform-input:focus { outline: none; border-color: var(--accent); color: var(--text-main); }
+        /* 頂部標籤與資訊區排版 */
+        .card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; border-bottom: 1px dashed var(--border); padding-bottom: 12px; gap: 8px; flex-wrap: wrap; }
+        .account-info-group { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; flex: 1; }
         
-        .delete-btn { background: transparent; border: none; color: #64748b; font-size: 1.4rem; border-radius: 6px; width: 34px; height: 34px; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: all 0.2s ease; margin-left: 8px; }
+        .account-name-input { font-weight: bold; color: var(--name-color); font-size: 1.1rem; background: var(--input-bg); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; width: 85px; font-family: inherit; }
+        .tag-input { font-size: 0.85rem; color: var(--text-muted); background: transparent; border: 1px dashed var(--border); border-radius: 4px; padding: 4px 6px; width: 75px; }
+        .account-name-input::placeholder, .tag-input::placeholder { color: var(--border); }
+        .account-name-input:focus, .tag-input:focus { outline: none; border-color: var(--accent); color: var(--text-main); }
+        
+        /* 標籤管理齒輪 */
+        .icon-btn { background: transparent; border: 1px solid var(--border); border-radius: 6px; color: var(--text-muted); width: 28px; height: 28px; display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 0.9rem; transition: 0.2s; }
+        .icon-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .icon-btn:active { transform: scale(0.9); }
+
+        .delete-btn { background: transparent; border: none; color: #64748b; font-size: 1.4rem; border-radius: 6px; width: 34px; height: 34px; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: all 0.2s ease; margin-left: auto; }
         .delete-btn:hover { background: rgba(244, 63, 94, 0.1); color: var(--danger); }
         .delete-btn:active { transform: scale(0.9); }
         
-        .status-badge { padding: 8px 16px; border-radius: 20px; font-size: 1rem; font-weight: bold; text-align: center; cursor: pointer; user-select: none; transition: transform 0.1s, filter 0.2s; white-space: nowrap; margin-left: auto; }
+        .status-badge { padding: 8px 16px; border-radius: 20px; font-size: 1rem; font-weight: bold; text-align: center; cursor: pointer; user-select: none; transition: transform 0.1s, filter 0.2s; white-space: nowrap; }
         .status-badge:active { transform: scale(0.95); }
         .status-ready { background: var(--ready); color: #11111b; }
         .status-waiting { background: var(--waiting); color: #11111b; }
         
         .card-inputs { display: grid; grid-template-columns: 1fr 2fr; gap: 12px; margin-bottom: 12px; }
-        input[type="time"], input[type="text"]:not(.account-name-input):not(.platform-input), textarea { background: var(--input-bg); color: var(--text-main); border: 1px solid var(--border); padding: 12px; border-radius: 8px; width: 100%; box-sizing: border-box; font-size: 1.1rem; }
+        input[type="time"], input[type="text"]:not(.account-name-input):not(.tag-input), textarea { background: var(--input-bg); color: var(--text-main); border: 1px solid var(--border); padding: 12px; border-radius: 8px; width: 100%; box-sizing: border-box; font-size: 1.1rem; }
         input[type="time"] { font-family: monospace; }
         textarea { resize: vertical; min-height: 60px; font-family: inherit; border: 1px dashed var(--border); line-height: 1.4; }
         input:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2); }
         
-        /* 快速標記按鈕區 (Tags) */
+        /* 快速標記按鈕區 */
         .tags-container { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
-        .tag-btn { background: transparent; border: 1px solid var(--border); color: var(--text-muted); padding: 6px 12px; border-radius: 16px; font-size: 0.85rem; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 4px; }
-        .tag-btn.active { background: rgba(129, 140, 248, 0.15); border-color: var(--tag-active); color: var(--tag-active); font-weight: bold; }
-        .tag-btn:active { transform: scale(0.95); }
+        .action-tag { background: transparent; border: 1px solid var(--border); color: var(--text-muted); padding: 6px 12px; border-radius: 16px; font-size: 0.85rem; cursor: pointer; transition: 0.2s; }
+        .action-tag.active-continue { background: rgba(129, 140, 248, 0.15); border-color: var(--tag-continue); color: var(--tag-continue); font-weight: bold; }
+        .action-tag.active-recorded { background: rgba(166, 227, 161, 0.15); border-color: var(--tag-recorded); color: var(--tag-recorded); font-weight: bold; }
+        .action-tag:active { transform: scale(0.95); }
 
         .loading-text { text-align: center; color: var(--accent); font-weight: bold; padding: 40px; animation: pulse 1.5s infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
@@ -88,6 +95,11 @@
                 <button class="header-btn btn-add" onclick="addAccount()">➕ 新增</button>
             </div>
         </div>
+
+        <!-- 標籤選項資料庫 (供所有卡片共用) -->
+        <datalist id="ai-options"></datalist>
+        <datalist id="platform-options"></datalist>
+
         <div id="tracker-list">
             <div class="loading-text">雲端資料同步中...</div>
         </div>
@@ -105,6 +117,31 @@
             if (appPassword) { localStorage.setItem('myAppPassword', appPassword); }
         }
 
+        // 讀取自訂標籤 (AI模型 & 平台)
+        let customAIs = JSON.parse(localStorage.getItem('aiModelTags')) || ['ChatGPT', 'Claude', 'Gemini', 'POE'];
+        let customPlatforms = JSON.parse(localStorage.getItem('aiPlatformTags')) || ['Chrome', 'Edge', '手機App', '無痕'];
+
+        function renderOptions() {
+            document.getElementById('ai-options').innerHTML = customAIs.map(p => `<option value="${p}">`).join('');
+            document.getElementById('platform-options').innerHTML = customPlatforms.map(p => `<option value="${p}">`).join('');
+        }
+        
+        // 彈出視窗統一管理標籤
+        window.manageTags = function() {
+            let aRes = prompt("🤖 管理【AI 模型】選項\n(多個標籤請用半形逗號 , 分隔)：", customAIs.join(', '));
+            if (aRes !== null) {
+                customAIs = aRes.split(',').map(s => s.trim()).filter(s => s);
+                localStorage.setItem('aiModelTags', JSON.stringify(customAIs));
+            }
+            let pRes = prompt("🏷️ 管理【平台】選項\n(多個標籤請用半形逗號 , 分隔)：", customPlatforms.join(', '));
+            if (pRes !== null) {
+                customPlatforms = pRes.split(',').map(s => s.trim()).filter(s => s);
+                localStorage.setItem('aiPlatformTags', JSON.stringify(customPlatforms));
+            }
+            renderOptions();
+            renderList(); // 更新畫面
+        };
+
         let audioCtx = null;
         let isSoundEnabled = true;
         let trackerData = [];
@@ -120,15 +157,8 @@
         window.toggleSound = function () {
             isSoundEnabled = !isSoundEnabled;
             const btn = document.getElementById('sound-btn');
-            if (isSoundEnabled) {
-                btn.textContent = '🔔 提示音';
-                btn.classList.remove('muted');
-                initAudio();
-                playAlertSound();
-            } else {
-                btn.textContent = '🔕 靜音';
-                btn.classList.add('muted');
-            }
+            if (isSoundEnabled) { btn.textContent = '🔔 提示音'; btn.classList.remove('muted'); initAudio(); playAlertSound();
+            } else { btn.textContent = '🔕 靜音'; btn.classList.add('muted'); }
         };
 
         function playAlertSound() {
@@ -137,14 +167,11 @@
             const playTone = (freq, startTime, duration) => {
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(freq, startTime);
+                osc.type = 'sine'; osc.frequency.setValueAtTime(freq, startTime);
                 gain.gain.setValueAtTime(0.4, startTime);
                 gain.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.start(startTime);
-                osc.stop(startTime + duration);
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                osc.start(startTime); osc.stop(startTime + duration);
             };
             const now = audioCtx.currentTime;
             playTone(880, now, 0.6);
@@ -163,25 +190,25 @@
                 }
 
                 if (Array.isArray(data) && data.length > 0) {
-                    // 為了相容舊資料，若無新欄位則補上預設值
                     trackerData = data.map(item => ({
                         ...item,
+                        ai: item.ai || '',
                         platform: item.platform || '',
                         needContinue: !!item.needContinue,
-                        needUpdate: !!item.needUpdate
+                        isRecorded: !!item.isRecorded // 確保有記錄狀態，預設為 false
                     }));
                 } else {
                     trackerData = [];
                 }
+                renderOptions();
                 renderList();
             } catch (error) {
-                console.error('讀取失敗:', error);
                 document.getElementById('tracker-list').innerHTML = '<div class="loading-text" style="color:var(--danger)">⚠️ 讀取失敗，請檢查 API 網址或網路。</div>';
             }
         }
 
         async function saveData() {
-            renderList(); // 保存時刷新畫面 UI 狀態
+            renderList();
             try {
                 await fetch(API_URL, {
                     method: 'POST',
@@ -206,29 +233,30 @@
                 card.className = 'account-card';
                 card.innerHTML = `
                 <div class="card-top">
-                    <div style="display: flex; align-items: flex-start;">
-                        <div class="account-info">
-                            <input type="text" class="account-name-input" placeholder="帳號名稱" value="${item.id}" onchange="updateField(${index}, 'id', this.value)">
-                            <input type="text" class="platform-input" placeholder="平台(如Chrome)" value="${item.platform || ''}" onchange="updateField(${index}, 'platform', this.value)">
-                        </div>
-                        <button class="delete-btn" onclick="removeAccount(${index})">×</button>
+                    <div class="account-info-group">
+                        <input type="text" class="account-name-input" placeholder="名稱" value="${item.id}" onchange="updateField(${index}, 'id', this.value)">
+                        <input type="text" list="ai-options" class="tag-input" placeholder="AI模型" value="${item.ai}" onchange="updateField(${index}, 'ai', this.value)">
+                        <input type="text" list="platform-options" class="tag-input" placeholder="平台" value="${item.platform}" onchange="updateField(${index}, 'platform', this.value)">
+                        <button class="icon-btn" onclick="manageTags()" title="管理標籤庫">⚙️</button>
                     </div>
-                    <div class="status-badge ${badgeClass}" onclick="toggleStatus(${index})">
-                        ${badgeText}
+                    <div style="display:flex; gap: 12px; align-items: center;">
+                        <div class="status-badge ${badgeClass}" onclick="toggleStatus(${index})">${badgeText}</div>
+                        <button class="delete-btn" onclick="removeAccount(${index})">×</button>
                     </div>
                 </div>
                 
                 <div class="card-inputs">
-                    <input type="time" value="${item.time}" onchange="updateField(${index}, 'time', this.value)">
+                    <!-- 加入 lang="en-GB" 協助部分瀏覽器強制 24 小時制 -->
+                    <input type="time" lang="en-GB" value="${item.time}" onchange="updateField(${index}, 'time', this.value)">
                     <input type="text" value="${item.task}" placeholder="當前任務目標..." onchange="updateField(${index}, 'task', this.value)">
                 </div>
 
                 <div class="tags-container">
-                    <button class="tag-btn ${item.needContinue ? 'active' : ''}" onclick="toggleTag(${index}, 'needContinue')">
-                        ${item.needContinue ? '➡️ 待按繼續' : '➕ 按繼續'}
+                    <button class="action-tag ${item.needContinue ? 'active-continue' : ''}" onclick="toggleTag(${index}, 'needContinue')">
+                        ${item.needContinue ? '➡️ 繼續' : '繼續'}
                     </button>
-                    <button class="tag-btn ${item.needUpdate ? 'active' : ''}" onclick="toggleTag(${index}, 'needUpdate')">
-                        ${item.needUpdate ? '📝 紀錄未更新' : '➕ 紀錄狀態'}
+                    <button class="action-tag ${item.isRecorded ? 'active-recorded' : ''}" onclick="toggleTag(${index}, 'isRecorded')">
+                        ${item.isRecorded ? '✅ 已紀錄' : '❌ 未紀錄'}
                     </button>
                 </div>
 
@@ -264,18 +292,14 @@
             initAudio();
             const item = trackerData[index];
             if (item.unlockTimestamp > 0 && Date.now() < item.unlockTimestamp) {
-                // 手動解除冷卻
                 item.unlockTimestamp = 0; 
             } else {
-                // 啟動冷卻：目前時間 +5 小時，並進位到下一個 10 分鐘
                 const targetDate = new Date();
                 targetDate.setHours(targetDate.getHours() + 5);
                 
                 let mins = targetDate.getMinutes();
                 let remainder = mins % 10;
-                if (remainder > 0) {
-                    targetDate.setMinutes(mins + (10 - remainder));
-                }
+                if (remainder > 0) { targetDate.setMinutes(mins + (10 - remainder)); }
                 targetDate.setSeconds(0);
 
                 const hh = String(targetDate.getHours()).padStart(2, '0');
@@ -293,7 +317,6 @@
             saveData(); 
         };
 
-        // 處理快速標記按鈕切換
         window.toggleTag = function (index, tagField) {
             trackerData[index][tagField] = !trackerData[index][tagField];
             saveData();
@@ -301,8 +324,8 @@
 
         window.addAccount = function () {
             trackerData.push({ 
-                id: '', platform: '', time: '', task: '', notes: '', 
-                unlockTimestamp: 0, needContinue: false, needUpdate: false 
+                id: '', ai: '', platform: '', time: '', task: '', notes: '', 
+                unlockTimestamp: 0, needContinue: false, isRecorded: false 
             });
             saveData();
             setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 100);
