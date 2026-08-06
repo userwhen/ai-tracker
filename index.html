@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AI 額度恢復追蹤器 (雲端共用版)</title>
+    <title>AI 帳號調度中心</title>
     <style>
         :root {
             --bg-color: #0f172a;     
@@ -18,8 +18,8 @@
             --button-bg: #334155;    
             --name-color: #818cf8;   
             --danger: #f43f5e;       
-            --tag-continue: #818cf8; /* 繼續按鈕亮起色 */
-            --tag-recorded: #a6e3a1; /* 已紀錄亮起綠色 */
+            --tag-continue: #818cf8; 
+            --tag-recorded: #a6e3a1; 
         }
         body { font-family: system-ui, -apple-system, sans-serif; background-color: var(--bg-color); color: var(--text-main); padding: 16px; margin: 0; display: flex; justify-content: center; touch-action: manipulation; }
         .container { width: 100%; max-width: 700px; }
@@ -36,17 +36,16 @@
         #tracker-list { display: flex; flex-direction: column; gap: 16px; padding-bottom: 40px; }
         .account-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 16px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); transition: 0.3s; }
         
-        /* 頂部標籤與資訊區排版 */
-        .card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; border-bottom: 1px dashed var(--border); padding-bottom: 12px; gap: 8px; flex-wrap: wrap; }
-        .account-info-group { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; flex: 1; }
+        /* 修改這裡確保上方資訊橫向展開 */
+        .card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px dashed var(--border); padding-bottom: 12px; gap: 8px; flex-wrap: wrap; }
+        .account-info-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; flex: 1; }
         
         .account-name-input { font-weight: bold; color: var(--name-color); font-size: 1.1rem; background: var(--input-bg); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; width: 85px; font-family: inherit; }
-        .tag-input { font-size: 0.85rem; color: var(--text-muted); background: transparent; border: 1px dashed var(--border); border-radius: 4px; padding: 4px 6px; width: 75px; }
+        .tag-input { font-size: 0.85rem; color: var(--text-muted); background: var(--input-bg); border: 1px dashed var(--border); border-radius: 4px; padding: 6px; width: 85px; }
         .account-name-input::placeholder, .tag-input::placeholder { color: var(--border); }
         .account-name-input:focus, .tag-input:focus { outline: none; border-color: var(--accent); color: var(--text-main); }
         
-        /* 標籤管理齒輪 */
-        .icon-btn { background: transparent; border: 1px solid var(--border); border-radius: 6px; color: var(--text-muted); width: 28px; height: 28px; display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 0.9rem; transition: 0.2s; }
+        .icon-btn { background: var(--input-bg); border: 1px solid var(--border); border-radius: 6px; color: var(--text-muted); width: 32px; height: 32px; display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 1rem; transition: 0.2s; }
         .icon-btn:hover { border-color: var(--accent); color: var(--accent); }
         .icon-btn:active { transform: scale(0.9); }
 
@@ -65,7 +64,6 @@
         textarea { resize: vertical; min-height: 60px; font-family: inherit; border: 1px dashed var(--border); line-height: 1.4; }
         input:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2); }
         
-        /* 快速標記按鈕區 */
         .tags-container { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
         .action-tag { background: transparent; border: 1px solid var(--border); color: var(--text-muted); padding: 6px 12px; border-radius: 16px; font-size: 0.85rem; cursor: pointer; transition: 0.2s; }
         .action-tag.active-continue { background: rgba(129, 140, 248, 0.15); border-color: var(--tag-continue); color: var(--tag-continue); font-weight: bold; }
@@ -96,7 +94,6 @@
             </div>
         </div>
 
-        <!-- 標籤選項資料庫 (供所有卡片共用) -->
         <datalist id="ai-options"></datalist>
         <datalist id="platform-options"></datalist>
 
@@ -107,7 +104,7 @@
 
     <script>
         // ==========================================
-        // 🚨 請貼上你的 Google Apps Script URL
+        // 🚨 務必將下方引號內的網址替換為你正確的 Web App URL 🚨
         // ==========================================
         const API_URL = 'https://script.google.com/macros/s/AKfycbwNsIOJ0bNdeajO1-Bk_LrLvNut-VpZ1gbDQkXx-hIZoP62SwI3Cc5Zah9SCANav2gN/exec';
 
@@ -117,7 +114,6 @@
             if (appPassword) { localStorage.setItem('myAppPassword', appPassword); }
         }
 
-        // 讀取自訂標籤 (AI模型 & 平台)
         let customAIs = JSON.parse(localStorage.getItem('aiModelTags')) || ['ChatGPT', 'Claude', 'Gemini', 'POE'];
         let customPlatforms = JSON.parse(localStorage.getItem('aiPlatformTags')) || ['Chrome', 'Edge', '手機App', '無痕'];
 
@@ -126,7 +122,6 @@
             document.getElementById('platform-options').innerHTML = customPlatforms.map(p => `<option value="${p}">`).join('');
         }
         
-        // 彈出視窗統一管理標籤
         window.manageTags = function() {
             let aRes = prompt("🤖 管理【AI 模型】選項\n(多個標籤請用半形逗號 , 分隔)：", customAIs.join(', '));
             if (aRes !== null) {
@@ -139,7 +134,7 @@
                 localStorage.setItem('aiPlatformTags', JSON.stringify(customPlatforms));
             }
             renderOptions();
-            renderList(); // 更新畫面
+            renderList(); 
         };
 
         let audioCtx = null;
@@ -195,7 +190,7 @@
                         ai: item.ai || '',
                         platform: item.platform || '',
                         needContinue: !!item.needContinue,
-                        isRecorded: !!item.isRecorded // 確保有記錄狀態，預設為 false
+                        isRecorded: !!item.isRecorded 
                     }));
                 } else {
                     trackerData = [];
@@ -246,7 +241,6 @@
                 </div>
                 
                 <div class="card-inputs">
-                    <!-- 加入 lang="en-GB" 協助部分瀏覽器強制 24 小時制 -->
                     <input type="time" lang="en-GB" value="${item.time}" onchange="updateField(${index}, 'time', this.value)">
                     <input type="text" value="${item.task}" placeholder="當前任務目標..." onchange="updateField(${index}, 'task', this.value)">
                 </div>
