@@ -621,7 +621,7 @@
                 </div>
                 
                 <div class="card-inputs">
-                    <input type="time" lang="en-GB" value="${item.time}" onchange="updateField(${index}, 'time', this.value)">
+                    <input type="time" lang="en-GB" step="60" value="${item.time}" onchange="updateField(${index}, 'time', this.value)">
                     <input type="text" value="${item.task || ''}" placeholder="▶ 下一次要處理的事項..." oninput="updateField(${index}, 'task', this.value)">
                 </div>
 
