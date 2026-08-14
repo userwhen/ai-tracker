@@ -1,94 +1,417 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>AI 工作線調度中心</title>
     <style>
         :root {
-            --bg-color: #0f172a;     
-            --card-bg: #1e293b;      
-            --text-main: #f1f5f9;    
-            --text-muted: #94a3b8;   
-            --accent: #38bdf8;       
-            --border: #334155;       
-            --ready: #5eead4;        
-            --waiting: #fbbf24;      
-            --input-bg: #020617;     
-            --button-bg: #334155;    
-            --name-color: #818cf8;   
-            --danger: #f43f5e;       
-            --tag-continue: #818cf8; 
-            --tag-recorded: #a6e3a1; 
-            --tag-mobile: #38bdf8;   
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --accent: #38bdf8;
+            --border: #334155;
+            --ready: #5eead4;
+            --waiting: #fbbf24;
+            --input-bg: #020617;
+            --button-bg: #334155;
+            --name-color: #818cf8;
+            --danger: #f43f5e;
+            --tag-continue: #818cf8;
+            --tag-recorded: #a6e3a1;
+            --tag-mobile: #38bdf8;
         }
-        * { box-sizing: border-box; }
-        body { font-family: system-ui, -apple-system, sans-serif; background-color: var(--bg-color); color: var(--text-main); padding: 16px; margin: 0; display: flex; justify-content: center; touch-action: manipulation; }
-        .container { width: 100%; max-width: 700px; }
-        
-        .page-header { background: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); margin-bottom: 16px; display: flex; flex-direction: column; gap: 16px; border: 1px solid var(--border); }
-        .header-top { display: flex; justify-content: space-between; align-items: center; }
-        h2 { margin: 0; color: var(--accent); font-size: 1.5rem; }
-        #clock { font-size: 1.2rem; color: var(--text-muted); font-family: monospace; font-weight: bold; }
-        
-        .header-controls { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 10px; }
-        .header-btn { background: var(--button-bg); color: var(--text-main); border: 1px solid var(--border); padding: 10px 16px; border-radius: 8px; cursor: pointer; font-size: 1rem; font-weight: bold; transition: background 0.2s, transform 0.1s; white-space: nowrap; }
-        .header-btn:active { transform: scale(0.95); }
-        .btn-add { background: var(--accent); color: #020617; border: none; }
-        
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: 16px;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            touch-action: manipulation;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 700px;
+        }
+
+        .page-header {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            margin-bottom: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            border: 1px solid var(--border);
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h2 {
+            margin: 0;
+            color: var(--accent);
+            font-size: 1.5rem;
+        }
+
+        #clock {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            font-family: monospace;
+            font-weight: bold;
+        }
+
+        .header-controls {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .header-btn {
+            background: var(--button-bg);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: background 0.2s, transform 0.1s;
+            white-space: nowrap;
+        }
+
+        .header-btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn-add {
+            background: var(--accent);
+            color: #020617;
+            border: none;
+        }
+
         /* 頂部快速導航區 */
-        .quick-nav-container { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); }
-        .nav-section-title { font-size: 0.8rem; font-weight: bold; color: var(--text-muted); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
-        .nav-chip-group { display: flex; flex-wrap: wrap; gap: 8px; min-height: 28px; align-items: center; }
-        .nav-divider { border-top: 1px dashed var(--border); margin: 12px 0; }
-        .nav-chip { background: var(--input-bg); border: 1px solid var(--border); color: var(--text-main); padding: 6px 12px; border-radius: 16px; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; user-select: none; }
-        .nav-chip:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-1px); }
-        .nav-chip.chip-ready { border-color: rgba(94, 234, 212, 0.3); }
-        .nav-chip.chip-waiting { border-color: rgba(251, 191, 36, 0.3); }
-        .empty-chip-text { color: var(--text-muted); font-size: 0.8rem; font-style: italic; }
+        .quick-nav-container {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
 
-        #tracker-list { display: flex; flex-direction: column; gap: 16px; padding-bottom: 40px; }
-        .account-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 16px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); transition: border-color 0.4s ease, box-shadow 0.4s ease; }
-        .account-card.highlight-card { border-color: var(--accent) !important; box-shadow: 0 0 12px rgba(56, 189, 248, 0.4); }
-        
-        .card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px dashed var(--border); padding-bottom: 12px; gap: 8px; flex-wrap: wrap; }
-        .account-info-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; flex: 1; }
-        
-        .account-name-input { font-weight: bold; color: var(--name-color); font-size: 1.1rem; background: var(--input-bg); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; width: 110px; font-family: inherit; }
-        .tag-input { font-size: 0.85rem; color: var(--text-muted); background: var(--input-bg); border: 1px dashed var(--border); border-radius: 4px; padding: 6px; width: 95px; }
-        .account-name-input::placeholder, .tag-input::placeholder { color: var(--border); }
-        .account-name-input:focus, .tag-input:focus { outline: none; border-color: var(--accent); color: var(--text-main); }
+        .nav-section-title {
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
 
-        .delete-btn { background: transparent; border: none; color: #64748b; font-size: 1.4rem; border-radius: 6px; width: 34px; height: 34px; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: all 0.2s ease; margin-left: auto; }
-        .delete-btn:hover { background: rgba(244, 63, 94, 0.1); color: var(--danger); }
-        
-        .status-badge { padding: 8px 16px; border-radius: 20px; font-size: 1rem; font-weight: bold; text-align: center; cursor: pointer; user-select: none; transition: transform 0.1s, filter 0.2s; white-space: nowrap; }
-        .status-badge:active { transform: scale(0.95); }
-        .status-ready { background: var(--ready); color: #11111b; }
-        .status-waiting { background: var(--waiting); color: #11111b; }
-        
-        .card-inputs { display: grid; grid-template-columns: 1fr 2fr; gap: 12px; margin-bottom: 12px; }
-        input[type="time"], input[type="text"]:not(.account-name-input):not(.tag-input), textarea { background: var(--input-bg); color: var(--text-main); border: 1px solid var(--border); padding: 12px; border-radius: 8px; width: 100%; box-sizing: border-box; font-size: 1rem; }
-        input[type="time"] { font-family: monospace; }
-        textarea { resize: vertical; min-height: 60px; font-family: inherit; border: 1px dashed var(--border); line-height: 1.4; }
-        input:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2); }
-        
-        .tags-container { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
-        .action-tag { background: transparent; border: 1px solid var(--border); color: var(--text-muted); padding: 6px 12px; border-radius: 16px; font-size: 0.85rem; cursor: pointer; transition: 0.2s; }
-        .action-tag.active-recorded { background: rgba(166, 227, 161, 0.15); border-color: var(--tag-recorded); color: var(--tag-recorded); font-weight: bold; }
-        .action-tag.active-continue { background: rgba(129, 140, 248, 0.15); border-color: var(--tag-continue); color: var(--tag-continue); font-weight: bold; }
-        .action-tag.active-mobile { background: rgba(56, 189, 248, 0.15); border-color: var(--tag-mobile); color: var(--tag-mobile); font-weight: bold; }
+        .nav-chip-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            min-height: 28px;
+            align-items: center;
+        }
 
-        .loading-text { text-align: center; color: var(--accent); font-weight: bold; padding: 40px; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        
-        @media (max-width: 500px) { 
-            .card-inputs { grid-template-columns: 1fr; } 
-            .header-top { flex-direction: column; align-items: flex-start; gap: 8px; } 
-            .header-controls { width: 100%; justify-content: flex-end; } 
+        .nav-divider {
+            border-top: 1px dashed var(--border);
+            margin: 12px 0;
+        }
+
+        .nav-chip {
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            user-select: none;
+        }
+
+        .nav-chip:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: translateY(-1px);
+        }
+
+        .nav-chip.chip-ready {
+            border-color: rgba(94, 234, 212, 0.3);
+        }
+
+        .nav-chip.chip-waiting {
+            border-color: rgba(251, 191, 36, 0.3);
+        }
+
+        .empty-chip-text {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            font-style: italic;
+        }
+
+        #tracker-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            padding-bottom: 40px;
+        }
+
+        .account-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            transition: border-color 0.4s ease, box-shadow 0.4s ease;
+        }
+
+        .account-card.highlight-card {
+            border-color: var(--accent) !important;
+            box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+        }
+
+        .card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            border-bottom: 1px dashed var(--border);
+            padding-bottom: 12px;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .account-info-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            flex: 1;
+        }
+
+        .account-name-input {
+            font-weight: bold;
+            color: var(--name-color);
+            font-size: 1.1rem;
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 6px 10px;
+            width: 110px;
+            font-family: inherit;
+        }
+
+        .tag-input {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            background: var(--input-bg);
+            border: 1px dashed var(--border);
+            border-radius: 4px;
+            padding: 6px;
+            width: 95px;
+        }
+
+        .account-name-input::placeholder,
+        .tag-input::placeholder {
+            color: var(--border);
+        }
+
+        .account-name-input:focus,
+        .tag-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            color: var(--text-main);
+        }
+
+        .delete-btn {
+            background: transparent;
+            border: none;
+            color: #64748b;
+            font-size: 1.4rem;
+            border-radius: 6px;
+            width: 34px;
+            height: 34px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-left: auto;
+        }
+
+        .delete-btn:hover {
+            background: rgba(244, 63, 94, 0.1);
+            color: var(--danger);
+        }
+
+        .status-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            text-align: center;
+            cursor: pointer;
+            user-select: none;
+            transition: transform 0.1s, filter 0.2s;
+            white-space: nowrap;
+        }
+
+        .status-badge:active {
+            transform: scale(0.95);
+        }
+
+        .status-ready {
+            background: var(--ready);
+            color: #11111b;
+        }
+
+        .status-waiting {
+            background: var(--waiting);
+            color: #11111b;
+        }
+
+        .card-inputs {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        input[type="time"],
+        input[type="text"]:not(.account-name-input):not(.tag-input),
+        textarea {
+            background: var(--input-bg);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            padding: 12px;
+            border-radius: 8px;
+            width: 100%;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+
+        input[type="time"] {
+            font-family: monospace;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 60px;
+            font-family: inherit;
+            border: 1px dashed var(--border);
+            line-height: 1.4;
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+        }
+
+        .tags-container {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .action-tag {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .action-tag.active-recorded {
+            background: rgba(166, 227, 161, 0.15);
+            border-color: var(--tag-recorded);
+            color: var(--tag-recorded);
+            font-weight: bold;
+        }
+
+        .action-tag.active-continue {
+            background: rgba(129, 140, 248, 0.15);
+            border-color: var(--tag-continue);
+            color: var(--tag-continue);
+            font-weight: bold;
+        }
+
+        .action-tag.active-mobile {
+            background: rgba(56, 189, 248, 0.15);
+            border-color: var(--tag-mobile);
+            color: var(--tag-mobile);
+            font-weight: bold;
+        }
+
+        .loading-text {
+            text-align: center;
+            color: var(--accent);
+            font-weight: bold;
+            padding: 40px;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        @media (max-width: 500px) {
+            .card-inputs {
+                grid-template-columns: 1fr;
+            }
+
+            .header-top {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .header-controls {
+                width: 100%;
+                justify-content: flex-end;
+            }
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="page-header">
@@ -107,9 +430,9 @@
         <div class="quick-nav-container">
             <div class="nav-section-title">🟢 可使用卡片</div>
             <div id="nav-ready-chips" class="nav-chip-group"></div>
-            
+
             <div class="nav-divider"></div>
-            
+
             <div class="nav-section-title">🟡 冷卻中卡片</div>
             <div id="nav-waiting-chips" class="nav-chip-group"></div>
         </div>
@@ -128,7 +451,7 @@
         let appPassword = localStorage.getItem('myAppPassword');
         if (!appPassword) {
             appPassword = prompt("請輸入系統存取密碼：");
-            if (appPassword) { localStorage.setItem('myAppPassword', appPassword); }
+            if (appPassword) {localStorage.setItem('myAppPassword', appPassword);}
         }
 
         function renderOptions() {
@@ -162,8 +485,8 @@
         window.toggleSound = function () {
             isSoundEnabled = !isSoundEnabled;
             const btn = document.getElementById('sound-btn');
-            if (isSoundEnabled) { btn.textContent = '🔔 提示音'; initAudio(); playAlertSound(); } 
-            else { btn.textContent = '🔕 靜音'; }
+            if (isSoundEnabled) {btn.textContent = '🔔 提示音'; initAudio(); playAlertSound();}
+            else {btn.textContent = '🔕 靜音';}
         };
 
         function playAlertSound() {
@@ -187,10 +510,10 @@
             try {
                 const response = await fetch(`${API_URL}?pwd=${appPassword}`);
                 const data = await response.json();
-                
+
                 if (data.error) {
                     alert("存取失敗：" + data.error);
-                    localStorage.removeItem('myAppPassword'); 
+                    localStorage.removeItem('myAppPassword');
                     return;
                 }
 
@@ -220,8 +543,8 @@
             try {
                 await fetch(API_URL, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify({ pwd: appPassword, payload: trackerData })
+                    headers: {'Content-Type': 'text/plain;charset=utf-8'},
+                    body: JSON.stringify({pwd: appPassword, payload: trackerData})
                 });
             } catch (error) {
                 console.error('儲存失敗:', error);
@@ -261,10 +584,10 @@
         }
 
         // 點擊小標直達卡片 + 亮閃效果
-        window.scrollToCard = function(index) {
+        window.scrollToCard = function (index) {
             const cardEl = document.getElementById(`card-${index}`);
             if (cardEl) {
-                cardEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                cardEl.scrollIntoView({behavior: 'smooth', block: 'center'});
                 cardEl.classList.add('highlight-card');
                 setTimeout(() => {
                     cardEl.classList.remove('highlight-card');
@@ -349,19 +672,20 @@
             initAudio();
             const item = trackerData[index];
             if (item.unlockTimestamp > 0 && Date.now() < item.unlockTimestamp) {
-                item.unlockTimestamp = 0; 
+                item.unlockTimestamp = 0;
             } else {
                 const targetDate = new Date();
-                targetDate.setHours(targetDate.getHours() + 5);
-                
+                targetDate.setHours(targetDate.getHours() + 4);
+                targetDate.setMinutes(targetDate.getMinutes() + 50);
+
                 let mins = targetDate.getMinutes();
                 let remainder = mins % 10;
-                if (remainder > 0) { targetDate.setMinutes(mins + (10 - remainder)); }
+                if (remainder > 0) {targetDate.setMinutes(mins + (10 - remainder));}
                 targetDate.setSeconds(0);
 
                 const hh = String(targetDate.getHours()).padStart(2, '0');
                 const mm = String(targetDate.getMinutes()).padStart(2, '0');
-                
+
                 item.time = `${hh}:${mm}`;
                 item.unlockTimestamp = targetDate.getTime();
             }
@@ -372,7 +696,7 @@
         window.updateField = function (index, field, value) {
             trackerData[index][field] = value;
             if (field === 'time') trackerData[index].unlockTimestamp = getNextOccurrence(value);
-            saveData(); 
+            saveData();
         };
 
         window.toggleTag = function (index, tagField) {
@@ -382,13 +706,13 @@
         };
 
         window.addAccount = function () {
-            trackerData.push({ 
-                id: '', ai: '', platform: '', time: '', task: '', notes: '', 
-                unlockTimestamp: 0, needContinue: false, isRecorded: false, isMobile: false 
+            trackerData.push({
+                id: '', ai: '', platform: '', time: '', task: '', notes: '',
+                unlockTimestamp: 0, needContinue: false, isRecorded: false, isMobile: false
             });
             renderList();
             saveData();
-            setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 100);
+            setTimeout(() => window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'}), 100);
         };
 
         window.removeAccount = function (index) {
@@ -418,7 +742,7 @@
                 }
             });
 
-            if (needRender) { renderList(); }
+            if (needRender) {renderList();}
             if (playSound) playAlertSound();
         }
 
@@ -426,4 +750,5 @@
         loadData(); 
     </script>
 </body>
+
 </html>
