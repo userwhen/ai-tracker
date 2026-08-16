@@ -451,7 +451,7 @@
         let appPassword = localStorage.getItem('myAppPassword');
         if (!appPassword) {
             appPassword = prompt("請輸入系統存取密碼：");
-            if (appPassword) {localStorage.setItem('myAppPassword', appPassword);}
+            if (appPassword) { localStorage.setItem('myAppPassword', appPassword); }
         }
 
         function renderOptions() {
@@ -485,8 +485,8 @@
         window.toggleSound = function () {
             isSoundEnabled = !isSoundEnabled;
             const btn = document.getElementById('sound-btn');
-            if (isSoundEnabled) {btn.textContent = '🔔 提示音'; initAudio(); playAlertSound();}
-            else {btn.textContent = '🔕 靜音';}
+            if (isSoundEnabled) { btn.textContent = '🔔 提示音'; initAudio(); playAlertSound(); }
+            else { btn.textContent = '🔕 靜音'; }
         };
 
         function playAlertSound() {
@@ -543,8 +543,8 @@
             try {
                 await fetch(API_URL, {
                     method: 'POST',
-                    headers: {'Content-Type': 'text/plain;charset=utf-8'},
-                    body: JSON.stringify({pwd: appPassword, payload: trackerData})
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ pwd: appPassword, payload: trackerData })
                 });
             } catch (error) {
                 console.error('儲存失敗:', error);
@@ -587,7 +587,7 @@
         window.scrollToCard = function (index) {
             const cardEl = document.getElementById(`card-${index}`);
             if (cardEl) {
-                cardEl.scrollIntoView({behavior: 'smooth', block: 'center'});
+                cardEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 cardEl.classList.add('highlight-card');
                 setTimeout(() => {
                     cardEl.classList.remove('highlight-card');
@@ -621,8 +621,7 @@
                 </div>
                 
                 <div class="card-inputs">
-                    <input type="text" placeholder="14:30" pattern="[0-2][0-9]:[0-5][0-9]" value="${item.time}" onchange="updateField(${index}, 'time', this.value)">
-                    <input type="text" value="${item.task || ''}" placeholder="▶ 下一次要處理的事項..." oninput="updateField(${index}, 'task', this.value)">
+                    <input type="text" placeholder="14:30" value="${item.time}" onchange="handleTimeInput(${index}, this)">
                 </div>
 
                 <div class="tags-container">
@@ -680,7 +679,7 @@
 
                 let mins = targetDate.getMinutes();
                 let remainder = mins % 10;
-                if (remainder > 0) {targetDate.setMinutes(mins + (10 - remainder));}
+                if (remainder > 0) { targetDate.setMinutes(mins + (10 - remainder)); }
                 targetDate.setSeconds(0);
 
                 const hh = String(targetDate.getHours()).padStart(2, '0');
@@ -698,6 +697,31 @@
             if (field === 'time') trackerData[index].unlockTimestamp = getNextOccurrence(value);
             saveData();
         };
+        // 自動將輸入的數字（如 1430、930）格式化為 24小時制 HH:mm 格式
+        window.handleTimeInput = function (index, inputEl) {
+            let val = inputEl.value.trim();
+            let digits = val.replace(/\D/g, ''); // 抓出純數字
+
+            if (digits.length > 0) {
+                // 自動補齊位數 (例: 930 -> 0930, 14 -> 1400)
+                if (digits.length === 3) digits = '0' + digits;
+                if (digits.length <= 2) digits = digits.padEnd(2, '0') + '00';
+
+                let hh = parseInt(digits.substring(0, 2) || '0', 10);
+                let mm = parseInt(digits.substring(2, 4) || '0', 10);
+
+                // 限制在 00~23 小時與 00~59 分鐘內
+                hh = Math.min(23, Math.max(0, hh));
+                mm = Math.min(59, Math.max(0, mm));
+
+                const formattedTime = `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`;
+
+                inputEl.value = formattedTime;
+                updateField(index, 'time', formattedTime);
+            } else {
+                updateField(index, 'time', '');
+            }
+        };
 
         window.toggleTag = function (index, tagField) {
             trackerData[index][tagField] = !trackerData[index][tagField];
@@ -712,7 +736,7 @@
             });
             renderList();
             saveData();
-            setTimeout(() => window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'}), 100);
+            setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 100);
         };
 
         window.removeAccount = function (index) {
@@ -742,7 +766,7 @@
                 }
             });
 
-            if (needRender) {renderList();}
+            if (needRender) { renderList(); }
             if (playSound) playAlertSound();
         }
 
